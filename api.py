@@ -5,16 +5,9 @@ import os
 from scraper import scrape_once
 import asyncio
 
-@app.get("/refresh")
-def refresh_ads():
-    try:
-        asyncio.run(scrape_once())
-        return {"status": "Oglasi osveženi!"}
-    except Exception as e:
-        return {"error": str(e)}
+app = FastAPI()  # ← MORA IĆI PRVO
 
-app = FastAPI()
-
+# Omogući CORS (da Android app može pristupiti)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,6 +15,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Endpoint za vraćanje oglasa
 @app.get("/oglasi")
 def get_ads():
     try:
@@ -30,5 +24,14 @@ def get_ads():
         with open("oglasi.json", "r", encoding="utf-8") as f:
             data = json.load(f)
         return data
+    except Exception as e:
+        return {"error": str(e)}
+
+# ✅ Endpoint za ručni refresh oglasa (poziva scraper)
+@app.get("/refresh")
+def refresh_ads():
+    try:
+        asyncio.run(scrape_once())
+        return {"status": "Oglasi osveženi!"}
     except Exception as e:
         return {"error": str(e)}
