@@ -1,13 +1,13 @@
+# scraper.py
 import asyncio
 from playwright.async_api import async_playwright
 import json
-import time
 
 URL = "https://www.willhaben.at/iad/gebrauchtwagen/auto/gebrauchtwagenboerse?fromYear=1990&price-to=15000&VERKAEUFERART=PRIVAT"
 
 seen_ads = set()
 
-async def scrape():
+async def scrape_once():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -53,11 +53,4 @@ async def scrape():
 
         await browser.close()
 
-if __name__ == "__main__":
-    while True:
-        try:
-            asyncio.run(scrape())
-            print(f"[{time.ctime()}] Oglasi osveženi.")
-        except Exception as e:
-            print("Greška:", e)
-        time.sleep(30)
+# Ne pokreće se automatski
