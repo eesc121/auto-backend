@@ -2,6 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
+from scraper import scrape_once
+import asyncio
+
+@app.get("/refresh")
+def refresh_ads():
+    try:
+        asyncio.run(scrape_once())
+        return {"status": "Oglasi osveženi!"}
+    except Exception as e:
+        return {"error": str(e)}
 
 app = FastAPI()
 
