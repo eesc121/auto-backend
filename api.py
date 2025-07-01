@@ -1,13 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
-from scraper import scrape_once
-import asyncio
 
-app = FastAPI()  # ← MORA IĆI PRVO
+app = FastAPI()
 
-# Omogući CORS (da Android app može pristupiti)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,7 +12,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Endpoint za vraćanje oglasa
 @app.get("/oglasi")
 def get_ads():
     try:
@@ -27,11 +23,12 @@ def get_ads():
     except Exception as e:
         return {"error": str(e)}
 
-# ✅ Endpoint za ručni refresh oglasa (poziva scraper)
-@app.get("/refresh")
-def refresh_ads():
+@app.post("/upload")
+async def upload_ads(request: Request):
     try:
-        asyncio.run(scrape_once())
-        return {"status": "Oglasi osveženi!"}
+        data = await request.json()
+        with open("oglasi.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return {"status": "Uspešno ažurirano"}
     except Exception as e:
         return {"error": str(e)}
